@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Синхронизация — LibraryAI</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-nav">
+      <a href="library.html" class="brand">
+        <img src="icons/icon48.png" alt="">
+        <span>LibraryAI</span>
+      </a>
+      <nav class="nav-links">
+        <a href="library.html">Мои книги</a>
+        <a href="app.html">Переводчик</a>
+        <a href="reader.html">Чтение</a>
+        <a href="sync.html" class="nav-gear active" title="Синхронизация с телефоном" aria-label="Синхронизация с телефоном">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+        </a>
+        <a href="options.html" class="nav-gear" title="Настройки" aria-label="Настройки">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.6.85 1 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </a>
+      </nav>
+    </div>
+    <div class="topbar-actions">
+      <button id="refreshCodeBtn" class="btn btn-sm" type="button">Новый код</button>
+    </div>
+  </header>
+
+  <main class="options-page">
+    <div class="options-grid">
+      <!-- Плитка 1: QR и код сопряжения -->
+      <section class="tile-card">
+        <div class="tile-head">
+          <span class="tile-num">QR</span>
+          <h3 class="tile-title">Сопряжение с телефоном (Wi-Fi WebRTC)</h3>
+        </div>
+
+        <div class="sync-qr-wrap">
+          <div id="qrBox" class="sync-qr-box"></div>
+          <div class="sync-code-meta">
+            <div class="hint" style="margin:0;">Код сопряжения</div>
+            <div id="pairCodeDisplay" class="sync-code-big">------</div>
+            <div id="syncStatus" class="sync-status">Инициализация...</div>
+          </div>
+        </div>
+
+        <div class="progress-wrap" style="margin-top:12px;">
+          <div id="syncProgressBar" class="progress-bar"></div>
+        </div>
+
+        <div class="field" style="margin-top:12px;">
+          <label for="pwaUrlInput">Ссылка на ваш LibraryAI PWA (GitHub Pages)</label>
+          <div class="row">
+            <input id="pwaUrlInput" type="text" placeholder="https://username.github.io/library-ai/">
+            <button id="savePwaUrlBtn" class="btn btn-sm" type="button" style="flex:0 0 auto;">Сохранить</button>
+          </div>
+          <div class="hint">Если указать ссылку, скан обычной камерой телефона сразу откроет PWA и запустит синхронизацию. Без ссылки в QR хранится сам 6-значный код.</div>
+        </div>
+      </section>
+
+      <!-- Плитка 2: Книги для синхронизации + ручной бэкап -->
+      <section class="tile-card">
+        <div class="tile-head" style="justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="tile-num">⇄</span>
+            <h3 class="tile-title">Книги для отправки на телефон</h3>
+          </div>
+          <span id="syncBooksSummary" class="hint" style="margin:0;">Загрузка...</span>
+        </div>
+
+        <div id="syncBookList" class="sync-book-list"></div>
+
+        <div style="border-top:1px solid var(--border);margin-top:12px;padding-top:12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;">
+          <span class="hint" style="margin:0;">Запасной способ без сети (файл .json):</span>
+          <div class="controls-group">
+            <button id="exportBackupBtn" class="btn btn-sm" type="button">Экспорт .json</button>
+            <button id="importBackupBtn" class="btn btn-sm" type="button">Импорт .json</button>
+            <input id="importBackupInput" type="file" accept=".json" class="hidden">
+          </div>
+        </div>
+      </section>
+
+      <!-- Плитка 3: Лог синхронизации -->
+      <section class="tile-card tile-wide">
+        <div class="tile-head">
+          <span class="tile-num">LOG</span>
+          <h3 class="tile-title">Журнал синхронизации</h3>
+        </div>
+        <div id="syncLog" class="log-box" style="max-height:180px;">
+          <div class="log-line">Откройте LibraryAI на телефоне → вкладка «Синхр.» и отсканируйте QR или введите код.</div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script type="module" src="sync.js"></script>
+</body>
+</html>

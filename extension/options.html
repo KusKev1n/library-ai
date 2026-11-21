@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Настройки — LibraryAI</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-nav">
+      <a href="library.html" class="brand">
+        <img src="icons/icon48.png" alt="">
+        <span>LibraryAI</span>
+      </a>
+      <nav class="nav-links">
+        <a href="library.html">Мои книги</a>
+        <a href="app.html">Переводчик</a>
+        <a href="reader.html">Чтение</a>
+        <a href="sync.html" class="nav-gear" title="Синхронизация с телефоном" aria-label="Синхронизация с телефоном"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></a>
+        <a href="options.html" class="nav-gear active" title="Настройки" aria-label="Настройки">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.6.85 1 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </a>
+      </nav>
+    </div>
+    <div class="topbar-actions">
+      <span id="saveStatus" class="hint" style="margin:0;"></span>
+      <button id="resetPromptBtn" class="btn btn-sm" type="button">Сбросить промпт</button>
+      <button id="saveBtn" class="btn btn-primary btn-sm" type="button">Сохранить</button>
+      <button id="backToAppBtn" class="btn btn-sm" type="button">Переводчик</button>
+    </div>
+  </header>
+
+  <main class="options-page">
+    <div class="options-grid">
+      <!-- Плитка 1: Режим работы и API -->
+      <section class="tile-card">
+        <div class="tile-head">
+          <span class="tile-num">01</span>
+          <h3 class="tile-title">Режим работы и API</h3>
+        </div>
+                <div class="field">
+          <label for="uiLang">Язык интерфейса</label>
+          <select id="uiLang">
+            <option value="auto">Авто (как в браузере)</option>
+            <option value="ru">Русский</option>
+            <option value="en">English</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="mode">Режим по умолчанию</label>
+          <select id="mode">
+            <option value="api">Через API (Gemini, DeepSeek, OpenAI)</option>
+            <option value="chat">Чат во вкладке браузера (Gemini, DeepSeek, ChatGPT)</option>
+          </select>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="apiProvider">API провайдер</label>
+            <select id="apiProvider">
+              <option value="gemini">Google Gemini API</option>
+              <option value="deepseek">DeepSeek API</option>
+              <option value="openai">OpenAI / OpenRouter / Custom</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="apiModel">Модель</label>
+            <select id="apiModel"></select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="apiCustomModel">Своя модель (перекрывает список)</label>
+          <input id="apiCustomModel" type="text" placeholder="Например: gemini-2.5-pro или deepseek-v4-pro">
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="apiKey">API-ключ</label>
+            <input id="apiKey" type="password" placeholder="Вставьте ключ API...">
+          </div>
+          <div class="field">
+            <label for="apiBaseUrl">Свой Base URL</label>
+            <input id="apiBaseUrl" type="text" placeholder="По умолчанию официальный">
+          </div>
+        </div>
+      </section>
+
+      <!-- Плитка 2: Температура и размышление -->
+      <section class="tile-card">
+        <div class="tile-head">
+          <span class="tile-num">02</span>
+          <h3 class="tile-title">Температура и размышление</h3>
+        </div>
+        <div class="field">
+          <label for="temperature">
+            <span>Температура (0.0 — строже, 1.3–2.0 — креативнее)</span>
+            <strong id="tempValue">0.7</strong>
+          </label>
+          <input id="temperature" type="range" min="0" max="2" step="0.1" value="0.7" style="width:100%;">
+          <div id="tempHint" class="hint"></div>
+        </div>
+
+        <div class="toggle-row">
+          <span>Включить размышление (Thinking / Reasoning)</span>
+          <label class="switch">
+            <input id="thinkingEnabled" type="checkbox">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label for="thinkingLevel">Уровень (Gemini 3/4, OpenAI)</label>
+            <select id="thinkingLevel">
+              <option value="low">low</option>
+              <option value="medium">medium</option>
+              <option value="high">high</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="thinkingBudget">Бюджет (Gemini 2.5; -1 = авто)</label>
+            <input id="thinkingBudget" type="number" min="-1" max="24576" step="512">
+          </div>
+        </div>
+      </section>
+
+      <!-- Плитка 3: Чат во вкладке браузера -->
+      <section class="tile-card">
+        <div class="tile-head">
+          <span class="tile-num">03</span>
+          <h3 class="tile-title">Чат во вкладке браузера</h3>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="chatProvider">Провайдер веб-чата</label>
+            <select id="chatProvider">
+              <option value="gemini">Gemini (gemini.google.com)</option>
+              <option value="deepseek">DeepSeek (chat.deepseek.com)</option>
+              <option value="chatgpt">ChatGPT (chatgpt.com)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="chatTimeoutSec">Таймаут ответа (сек)</label>
+            <input id="chatTimeoutSec" type="number" min="30" max="600" step="10">
+          </div>
+        </div>
+
+        <div class="toggle-row">
+          <span>Вставлять префикс навыка перед текстом</span>
+          <label class="switch">
+            <input id="chatUseSkillPrefix" type="checkbox">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label for="chatSkillPrefix">Префикс навыка</label>
+            <input id="chatSkillPrefix" type="text" placeholder="@read, /read...">
+          </div>
+          <div class="field">
+            <label for="chatSkillFrequency">Частота навыка</label>
+            <select id="chatSkillFrequency">
+              <option value="every">Перед каждым фрагментом</option>
+              <option value="first">Только в 1-м сообщении</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label for="chatSystemPromptFrequency">Системный промпт в чат</label>
+            <select id="chatSystemPromptFrequency">
+              <option value="first">Только в 1-м сообщении</option>
+              <option value="every">Перед каждым фрагментом</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="chatNewChatEvery">Новый чат каждые N (0 = нет)</label>
+            <input id="chatNewChatEvery" type="number" min="0" max="100" step="1">
+          </div>
+        </div>
+
+        <div class="toggle-row">
+          <span>Отправлять системный промпт в веб-чат</span>
+          <label class="switch">
+            <input id="chatSendSystemPrompt" type="checkbox">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="toggle-row">
+          <span>Автопереключение DeepThink / Reason в чате</span>
+          <label class="switch">
+            <input id="chatAutoToggleThinking" type="checkbox">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </section>
+
+      <!-- Плитка 4: Разбивка и связность -->
+      <section class="tile-card">
+        <div class="tile-head">
+          <span class="tile-num">04</span>
+          <h3 class="tile-title">Разбивка и связность</h3>
+        </div>
+        <div class="field">
+          <label for="chunkSize">Макс. символов в одном фрагменте</label>
+          <input id="chunkSize" type="number" min="1000" max="20000" step="500">
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="delayMs">Пауза между запросами (мс)</label>
+            <input id="delayMs" type="number" min="0" max="60000" step="500">
+          </div>
+          <div class="field">
+            <label for="maxRetries">Повторов при ошибке</label>
+            <input id="maxRetries" type="number" min="0" max="5" step="1">
+          </div>
+        </div>
+        <div class="toggle-row" style="margin-top:6px;">
+          <span>Передавать 2 последних предложения прошлого куска</span>
+          <label class="switch">
+            <input id="includePrevContext" type="checkbox">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </section>
+
+      <!-- Плитка 5: Системный промпт -->
+      <section class="tile-card">
+        <div class="tile-head">
+          <span class="tile-num">05</span>
+          <h3 class="tile-title">Системный промпт</h3>
+        </div>
+        <div class="field" style="flex:1;display:flex;flex-direction:column;">
+          <label for="systemPrompt">Инструкции для переводчика</label>
+          <textarea id="systemPrompt" rows="8" style="flex:1;"></textarea>
+        </div>
+      </section>
+
+      <!-- Плитка 6: Глоссарий -->
+      <section class="tile-card">
+        <div class="tile-head">
+          <span class="tile-num">06</span>
+          <h3 class="tile-title">Глоссарий имён и терминов</h3>
+        </div>
+        <div class="field" style="flex:1;display:flex;flex-direction:column;">
+          <label for="glossary">Формат: Оригинал = Перевод (по строке)</label>
+          <textarea id="glossary" rows="8" style="flex:1;" placeholder="Northern Empire = Северная Империя&#10;SkyRune = Небесная Руна"></textarea>
+        </div>
+      </section>
+
+      <!-- Плитка 7: Полная статистика -->
+      <section id="statsTile" class="tile-card tile-wide">
+        <div class="tile-head" style="justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="tile-num">07</span>
+            <h3 class="tile-title">Статистика переводов</h3>
+          </div>
+          <button id="resetStatsBtn" class="btn btn-danger btn-xs" type="button">Сбросить статистику</button>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-label">Всего токенов (API)</div>
+            <div id="statTotalTokens" class="stat-value">0</div>
+            <div id="statTokensBreakdown" class="stat-sub">Вход: 0 · Выход: 0 · Размышл.: 0</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Переведено символов</div>
+            <div id="statTranslatedChars" class="stat-value">0</div>
+            <div id="statSourceChars" class="stat-sub">Из оригинала: 0 симв.</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Переведено глав</div>
+            <div id="statChapters" class="stat-value">0</div>
+            <div class="stat-sub">Через переводчик и читалку</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Выполнено запросов</div>
+            <div id="statRequests" class="stat-value">0</div>
+            <div id="statRequestsBreakdown" class="stat-sub">API: 0 · Веб-чат: 0</div>
+          </div>
+        </div>
+        <div class="book-stats-section">
+          <div class="book-stats-heading">По книгам</div>
+          <div id="bookStatsList" class="book-stats-list">
+            <div class="hint">Пока нет переведённых книг в статистике.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Плитка 8: Сохранённые связи (телефоны) -->
+      <section id="pairedTile" class="tile-card tile-wide">
+        <div class="tile-head" style="justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="tile-num">08</span>
+            <h3 class="tile-title">Сохранённые связи (телефоны)</h3>
+          </div>
+          <div class="controls-group">
+            <a href="sync.html" class="btn btn-xs" style="text-decoration:none;">Открыть синхронизацию</a>
+            <button id="clearPairsBtn" class="btn btn-danger btn-xs" type="button">Отвязать все</button>
+          </div>
+        </div>
+        <div id="pairedDevicesList" class="book-stats-list">
+          <div class="hint">Пока нет сопряжённых устройств.</div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script type="module" src="options.js"></script>
+</body>
+</html>

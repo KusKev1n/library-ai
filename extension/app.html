@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Переводчик — LibraryAI</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-nav">
+      <a href="library.html" class="brand">
+        <img src="icons/icon48.png" alt="">
+        <span>LibraryAI</span>
+      </a>
+      <nav class="nav-links">
+        <a href="library.html">Мои книги</a>
+        <a href="app.html" class="active">Переводчик</a>
+        <a id="navReaderLink" href="reader.html">Чтение</a>
+        <a href="sync.html" class="nav-gear" title="Синхронизация с телефоном" aria-label="Синхронизация с телефоном"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></a>
+        <a href="options.html" class="nav-gear" title="Настройки" aria-label="Настройки"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.6.85 1 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></a>
+      </nav>
+    </div>
+    <div class="topbar-actions">
+      <a id="statsPill" href="options.html#statsTile" class="pill stats-pill" title="Полная статистика токенов и символов">Токены: 0 · Симв.: 0</a>
+      <span id="pdfjsStatus" class="pill">Проверка PDF.js...</span>
+      <span id="chatTabPill" class="pill hidden">Чат: не проверен</span>
+      <button id="openHistoryBtn" class="btn btn-sm">История / Память</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="card">
+        <h3 class="card-title">1. Книга</h3>
+        <div id="dropzone" class="dropzone">
+          <strong>Перетащите PDF или EPUB сюда</strong>
+          <span>или выберите файл (также можно открыть из Библиотеки)</span>
+          <input id="fileInput" type="file" accept=".epub,.pdf" class="hidden">
+        </div>
+        <div id="fileInfo" class="hint" style="margin-top:8px;"></div>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title">2. Режим перевода</h3>
+        <div class="segmented">
+          <button id="modeApiBtn" type="button" class="active">Через API</button>
+          <button id="modeChatBtn" type="button">Чат во вкладке</button>
+        </div>
+
+        <div id="apiSection">
+          <div class="field">
+            <label for="apiProvider">Провайдер API</label>
+            <select id="apiProvider">
+              <option value="gemini">Google Gemini API</option>
+              <option value="deepseek">DeepSeek API</option>
+              <option value="openai">OpenAI / OpenRouter / Custom</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="apiModel">Модель</label>
+            <select id="apiModel"></select>
+          </div>
+          <div class="field">
+            <label for="apiCustomModel">Своя модель (необязательно)</label>
+            <input id="apiCustomModel" type="text" placeholder="Например: gemini-2.5-flash">
+          </div>
+          <div class="field">
+            <label for="apiKey">API-ключ</label>
+            <input id="apiKey" type="password" placeholder="Вставьте ключ API...">
+          </div>
+        </div>
+
+        <div id="chatSection" class="hidden">
+          <div class="field">
+            <label for="chatProvider">Сайт чата</label>
+            <select id="chatProvider">
+              <option value="gemini">Gemini (gemini.google.com)</option>
+              <option value="deepseek">DeepSeek (chat.deepseek.com)</option>
+              <option value="chatgpt">ChatGPT (chatgpt.com)</option>
+            </select>
+          </div>
+
+          <div class="row" style="margin-bottom:10px;">
+            <button id="openChatTabBtn" type="button" class="btn btn-sm">Открыть чат</button>
+            <button id="checkChatTabBtn" type="button" class="btn btn-sm">Проверить вкладку</button>
+          </div>
+          <div id="chatStatusDetail" class="hint" style="margin-bottom:10px;">
+            Откройте вкладку чата и войдите в аккаунт.
+          </div>
+
+          <div class="toggle-row">
+            <span>Новая вкладка на фрагмент</span>
+            <label class="switch">
+              <input id="chatFreshTabPerChunk" type="checkbox">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="toggle-row">
+            <span>Навык/команда перед текстом</span>
+            <label class="switch">
+              <input id="chatUseSkillPrefix" type="checkbox">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div id="skillPrefixBlock" class="field">
+            <label for="chatSkillPrefix">Префикс навыка (редактируется)</label>
+            <input id="chatSkillPrefix" type="text" placeholder="@read или /read">
+            <div class="chips">
+              <button type="button" class="chip" data-skill="@read">@read</button>
+              <button type="button" class="chip" data-skill="/read">/read</button>
+              <button type="button" class="chip" data-skill="@noveltranslate">@noveltranslate</button>
+              <button type="button" class="chip" data-skill="">Без префикса</button>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="chatSkillFrequency">Когда добавлять навык</label>
+            <select id="chatSkillFrequency">
+              <option value="every">Перед каждым фрагментом</option>
+              <option value="first">Только в 1-м сообщении чата</option>
+            </select>
+          </div>
+
+          <div class="toggle-row">
+            <span>Добавлять системный промпт</span>
+            <label class="switch">
+              <input id="chatSendSystemPrompt" type="checkbox">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div style="border-top:1px solid var(--border); margin-top:10px; padding-top:10px;">
+          <div class="field">
+            <label for="temperature">
+              <span>Температура</span>
+              <strong id="tempValue">0.7</strong>
+            </label>
+            <input id="temperature" type="range" min="0" max="2" step="0.1" value="0.7" style="width:100%;">
+            <div id="tempHint" class="hint"></div>
+          </div>
+
+          <div class="toggle-row">
+            <span>Включить размышление (Thinking)</span>
+            <label class="switch">
+              <input id="thinkingEnabled" type="checkbox">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div id="thinkingOptions" class="field hidden">
+            <label for="thinkingLevel">Уровень размышления</label>
+            <select id="thinkingLevel">
+              <option value="low">Низкий (low)</option>
+              <option value="medium">Средний (medium)</option>
+              <option value="high">Высокий (high)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <details>
+          <summary>Системный промпт и глоссарий</summary>
+          <div class="field" style="margin-top:10px;">
+            <label for="systemPrompt">Системный промпт</label>
+            <textarea id="systemPrompt" rows="5"></textarea>
+          </div>
+          <div class="field">
+            <label for="glossary">Глоссарий (Имя = Перевод)</label>
+            <textarea id="glossary" rows="3" placeholder="SkyRune = Небесная Руна&#10;Hakon = Хакон"></textarea>
+          </div>
+          <div class="row">
+            <div class="field">
+              <label for="chunkSize">Размер куска</label>
+              <input id="chunkSize" type="number" min="1000" max="20000" step="500">
+            </div>
+            <div class="field">
+              <label for="delayMs">Пауза (мс)</label>
+              <input id="delayMs" type="number" min="0" max="60000" step="500">
+            </div>
+          </div>
+        </details>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="card">
+        <div class="controls-bar">
+          <div class="controls-group">
+            <button id="startBtn" class="btn btn-primary" disabled>Начать перевод</button>
+            <button id="pauseBtn" class="btn btn-warn hidden">Пауза</button>
+            <button id="stopBtn" class="btn btn-danger hidden">Остановить</button>
+            <span class="hint" id="rangeWrap">
+              Главы с <input id="fromChapter" type="number" min="1" value="1" style="width:58px;display:inline;padding:3px 6px;">
+              по <input id="toChapter" type="number" min="1" value="1" style="width:58px;display:inline;padding:3px 6px;">
+            </span>
+          </div>
+          <div class="controls-group">
+            <button id="openReaderBtn" class="btn btn-primary btn-sm" disabled>📖 Читать</button>
+            <button id="exportEpubBtn" class="btn btn-success btn-sm" disabled>EPUB</button>
+            <button id="exportHtmlBtn" class="btn btn-sm" disabled>HTML</button>
+            <button id="exportPdfBtn" class="btn btn-sm" disabled>PDF</button>
+            <button id="exportTxtBtn" class="btn btn-sm" disabled>TXT</button>
+          </div>
+        </div>
+
+        <div class="progress-wrap">
+          <div id="progressBar" class="progress-bar"></div>
+        </div>
+        <div class="controls-bar">
+          <span id="progressText" class="hint">Выберите книгу из Библиотеки или загрузите PDF/EPUB.</span>
+          <button id="clearSavedBtn" class="btn btn-sm hidden">Сбросить перевод</button>
+        </div>
+      </div>
+
+      <div class="workspace-grid">
+        <div class="chapter-pane">
+          <div class="chapter-toolbar">
+            <div class="chapter-toolbar-row">
+              <button id="skipShortBtn" class="btn btn-xs" type="button" disabled title="Исключить короткие главы (обложки, оглавления, заглушки)">Убрать &lt;</button>
+              <input id="shortThresholdInput" class="threshold-input" type="number" min="20" max="5000" step="50" value="350" title="Порог символов">
+              <span class="threshold-unit">симв.</span>
+              <button id="unskipAllBtn" class="btn btn-xs" type="button" disabled title="Вернуть все исключённые главы в перевод">Все</button>
+            </div>
+            <div id="skippedCounter" class="chapter-toolbar-meta">Галочка — включить в перевод</div>
+          </div>
+          <div class="chapter-list" id="chapterList">
+            <div style="padding:16px;color:var(--muted);font-size:13px;">Список глав появится после загрузки книги.</div>
+          </div>
+        </div>
+
+        <div class="preview-pane">
+          <div class="preview-header">
+            <div class="preview-title-wrap">
+              <strong id="previewTitle">Предпросмотр главы</strong>
+              <span id="previewCharCount" class="preview-chars"></span>
+            </div>
+            <div class="preview-actions">
+              <button id="toggleSkipChapterBtn" class="btn btn-sm" type="button" disabled>Исключить из перевода</button>
+              <button id="retranslateChapterBtn" class="btn btn-sm" type="button" disabled>Перевести эту главу заново</button>
+            </div>
+          </div>
+          <div class="preview-split">
+            <div class="preview-col" id="origPreview">Оригинал появится здесь...</div>
+            <div class="preview-col" id="transPreview">Перевод появится здесь...</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="log-box" id="logBox">
+        <div class="log-line">Готов к работе.</div>
+      </div>
+    </main>
+  </div>
+
+  <!-- МОДАЛЬНОЕ ОКНО: ИСТОРИЯ ПЕРЕВОДОВ И ПАПКА ХРАНЕНИЯ -->
+  <div id="historyModal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <strong>История сохранённых переводов</strong>
+          <div id="historySummary" class="hint">Загрузка...</div>
+        </div>
+        <button id="closeHistoryBtn" class="btn btn-sm" type="button">Закрыть</button>
+      </div>
+
+      <div style="padding:12px 18px;border-bottom:1px solid var(--border);background:var(--surface-2);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+        <div>
+          <div style="font-size:12px;color:var(--muted);font-weight:600;">Папка хранения истории</div>
+          <div id="historyDirLabel" style="font-size:13px;font-weight:600;">IndexedDB</div>
+        </div>
+        <div class="controls-group">
+          <button id="grantDirPermBtn" class="btn btn-warn btn-sm hidden" type="button">Подключить</button>
+          <button id="pickHistoryDirBtn" class="btn btn-sm" type="button">📁 Выбрать папку...</button>
+          <button id="resetHistoryDirBtn" class="btn btn-sm hidden" type="button">Сбросить</button>
+        </div>
+      </div>
+
+      <div id="historyList" class="modal-body"></div>
+
+      <div class="modal-footer">
+        <span class="hint">Переводы можно хранить в любой локальной папке.</span>
+        <button id="deleteAllHistoryBtn" class="btn btn-danger btn-sm" type="button">Удалить все переводы</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

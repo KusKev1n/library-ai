@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Чтение — LibraryAI</title>
+  <link rel="stylesheet" href="reader.css">
+</head>
+<body>
+  <div id="progressTrack" class="reading-progress-track hidden">
+    <div id="progressFill" class="reading-progress-fill"></div>
+  </div>
+  <div id="timeLeftPill" class="time-left-pill hidden">~1 мин. осталось</div>
+
+  <header id="readerHeader" class="reader-header">
+    <div class="reader-header-left">
+      <nav class="reader-mode-nav" aria-label="Навигация">
+        <a href="library.html" class="mode-icon-link" title="Мои книги" aria-label="Мои книги"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></a>
+        <a id="navTranslateLink" href="app.html" class="mode-icon-link" title="Переводчик" aria-label="Переводчик"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg></a>
+        <a href="reader.html" class="mode-icon-link active" title="Чтение" aria-label="Чтение"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></a>
+        <a href="sync.html" class="mode-icon-link" title="Синхронизация с телефоном" aria-label="Синхронизация с телефоном"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></a>
+        <a href="options.html" class="mode-icon-link" title="Настройки" aria-label="Настройки"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.6.85 1 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></a>
+      </nav>
+      <span class="header-sep"></span>
+      <button id="tocBtn" class="icon-btn" type="button">☰ Главы</button>
+      <div id="bookHeading" class="book-heading">Загрузка книги...</div>
+    </div>
+    <div class="reader-header-right">
+      <button id="prevTopBtn" class="icon-btn" type="button">← Пред.</button>
+      <button id="nextTopBtn" class="icon-btn" type="button">След. →</button>
+      <button id="settingsBtn" class="icon-btn" type="button">Aa Вид</button>
+    </div>
+  </header>
+
+  <main id="readerMain" class="reader-main">
+    <div class="chapter-header">
+      <h1 id="chapterTitle">Загрузка...</h1>
+      <div id="chapterSub" class="chapter-sub"></div>
+      <div id="chapterActionsBar" class="chapter-actions-bar hidden">
+        <button id="translateHereBtn" class="subtle-translate-btn" type="button">Перевести главу</button>
+        <button id="stopTranslateHereBtn" class="subtle-translate-btn danger hidden" type="button">Остановить</button>
+        <button id="toggleOrigBtn" class="subtle-translate-btn hidden" type="button">Показать оригинал</button>
+      </div>
+    </div>
+    <article id="chapterContent" class="chapter-content"></article>
+
+    <nav class="chapter-nav">
+      <button id="prevBottomBtn" class="icon-btn" type="button">← Предыдущая глава</button>
+      <button id="nextBottomBtn" class="icon-btn" type="button">Следующая глава →</button>
+    </nav>
+  </main>
+
+  <div id="autoscrollBar" class="autoscroll-bar hidden">
+    <button id="autoToggleBtn" type="button">▶ Автопрокрутка</button>
+    <button id="autoSlowerBtn" type="button">−</button>
+    <span id="autoSpeedLabel" style="font-size:12px;">1.0x</span>
+    <button id="autoFasterBtn" type="button">+</button>
+  </div>
+
+  <div id="drawerBackdrop" class="drawer-backdrop hidden"></div>
+
+  <aside id="tocDrawer" class="toc-drawer hidden">
+    <div class="drawer-head">
+      <span>Оглавление</span>
+      <button id="closeTocBtn" class="settings-close" type="button">×</button>
+    </div>
+    <div id="tocList" class="toc-list"></div>
+  </aside>
+
+  <aside id="settingsDrawer" class="settings-drawer hidden">
+    <div class="settings-tabs">
+      <button class="settings-tab active" data-tab="colours" type="button">Цвета</button>
+      <button class="settings-tab" data-tab="text" type="button">Текст</button>
+      <button class="settings-tab" data-tab="reading" type="button">Чтение</button>
+      <button id="closeSettingsBtn" class="settings-close" type="button">×</button>
+    </div>
+
+    <div class="settings-body">
+      <div id="tab-colours" class="tab-pane">
+        <div class="panel-card" style="margin-bottom:12px;">
+          <div class="panel-label">Тема</div>
+          <div class="theme-grid" id="themeGrid">
+            <button type="button" class="theme-swatch" data-theme="paper">
+              <div class="aa" style="background:#f9f8f4;color:#222;">Aa</div>
+              <span>Бумага</span>
+            </button>
+            <button type="button" class="theme-swatch" data-theme="sepia">
+              <div class="aa" style="background:#f3e8d2;color:#3d2f1e;">Aa</div>
+              <span>Сепия</span>
+            </button>
+            <button type="button" class="theme-swatch" data-theme="sage">
+              <div class="aa" style="background:#e9efe4;color:#243024;">Aa</div>
+              <span>Шалфей</span>
+            </button>
+            <button type="button" class="theme-swatch" data-theme="night">
+              <div class="aa" style="background:#161d2b;color:#dce3f0;">Aa</div>
+              <span>Ночь</span>
+            </button>
+            <button type="button" class="theme-swatch" data-theme="graphite">
+              <div class="aa" style="background:#1b1a19;color:#e6e2dc;">Aa</div>
+              <span>Графит</span>
+            </button>
+            <button type="button" class="theme-swatch" data-theme="oled">
+              <div class="aa" style="background:#000000;color:#d4d4d8;">Aa</div>
+              <span>OLED</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="panel-card">
+          <div class="panel-label">Свои цвета</div>
+          <div class="color-pickers">
+            <label class="color-pill">
+              <input id="customBg" type="color" value="#1b1a19">
+              <span>Фон</span>
+            </label>
+            <label class="color-pill">
+              <input id="customText" type="color" value="#e6e2dc">
+              <span>Текст</span>
+            </label>
+          </div>
+          <div id="contrastReadout" class="panel-label" style="margin:10px 0 0;">Контраст: —</div>
+        </div>
+      </div>
+
+      <div id="tab-text" class="tab-pane hidden">
+        <div class="panel-card" style="margin-bottom:12px;">
+          <div class="stepper-row">
+            <span>Шрифт</span>
+            <select id="fontFamily" class="select-dark"></select>
+          </div>
+
+          <div class="custom-font-row">
+            <div class="font-actions">
+              <button id="uploadFontBtn" class="mini-btn" type="button">+ Загрузить шрифт (.ttf/.woff2)</button>
+              <button id="deleteCustomFontBtn" class="mini-btn hidden" type="button">Удалить</button>
+              <input id="fontFileInput" type="file" accept=".ttf,.otf,.woff,.woff2" class="hidden">
+            </div>
+            <div class="font-actions">
+              <input id="systemFontInput" class="font-input" type="text" placeholder="Или системный: Literata, Bookerly...">
+              <button id="applySystemFontBtn" class="mini-btn" type="button">OK</button>
+            </div>
+            <div id="fontStatusHint" class="panel-label" style="margin:0;"></div>
+          </div>
+
+          <div class="stepper-row">
+            <span>Размер</span>
+            <div class="stepper-ctrl">
+              <button type="button" data-step="fontSize" data-delta="-1">−</button>
+              <span id="fontSizeVal">18 px</span>
+              <button type="button" data-step="fontSize" data-delta="1">+</button>
+            </div>
+          </div>
+          <div class="stepper-row">
+            <span>Межстрочный</span>
+            <div class="stepper-ctrl">
+              <button type="button" data-step="lineHeight" data-delta="-0.1">−</button>
+              <span id="lineHeightVal">1.7</span>
+              <button type="button" data-step="lineHeight" data-delta="0.1">+</button>
+            </div>
+          </div>
+          <div class="stepper-row">
+            <span>Абзацы</span>
+            <div class="stepper-ctrl">
+              <button type="button" data-step="paraGap" data-delta="-2">−</button>
+              <span id="paraGapVal">16 px</span>
+              <button type="button" data-step="paraGap" data-delta="2">+</button>
+            </div>
+          </div>
+          <div class="stepper-row">
+            <span>Жирность</span>
+            <div class="stepper-ctrl">
+              <button type="button" data-step="fontWeight" data-delta="-100">−</button>
+              <span id="fontWeightVal">400</span>
+              <button type="button" data-step="fontWeight" data-delta="100">+</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-card">
+          <div class="panel-label">На странице</div>
+          <div class="setting-toggle">
+            <div>
+              <span>Красная строка</span>
+              <span class="sub">Отступ первой строки абзаца</span>
+            </div>
+            <label class="switch">
+              <input id="firstLineIndent" type="checkbox">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
+            <div class="panel-label">Выравнивание</div>
+            <div class="align-grid">
+              <button type="button" class="align-btn" data-align="left">По левому</button>
+              <button type="button" class="align-btn" data-align="center">По центру</button>
+              <button type="button" class="align-btn" data-align="justify">По ширине</button>
+            </div>
+          </div>
+
+          <div class="setting-toggle">
+            <div>
+              <span>На всю ширину</span>
+              <span class="sub">Растянуть текст на весь экран</span>
+            </div>
+            <label class="switch">
+              <input id="fullWidth" type="checkbox">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="stepper-row">
+            <span>Ширина колонки</span>
+            <div class="stepper-ctrl">
+              <button type="button" data-step="contentWidth" data-delta="-60">−</button>
+              <span id="contentWidthVal">740 px</span>
+              <button type="button" data-step="contentWidth" data-delta="60">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-reading" class="tab-pane hidden">
+        <div class="panel-card">
+          <div class="panel-label">Во время чтения</div>
+
+          <div class="setting-toggle">
+            <div>
+              <span>Не гасить экран</span>
+              <span class="sub">Экран не блокируется во время чтения</span>
+            </div>
+            <label class="switch">
+              <input id="keepScreenOn" type="checkbox">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="setting-toggle">
+            <div>
+              <span>Прогресс и время</span>
+              <span class="sub">Полоса прогресса сверху и оставшиеся минуты</span>
+            </div>
+            <label class="switch">
+              <input id="showTimeLeft" type="checkbox">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="setting-toggle">
+            <div>
+              <span>Автопрокрутка</span>
+              <span class="sub">Плавающая кнопка плавной прокрутки</span>
+            </div>
+            <label class="switch">
+              <input id="showAutoscroll" type="checkbox">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="setting-toggle">
+            <div>
+              <span>Скрывать верхнюю панель</span>
+              <span class="sub">Панель прячется при прокрутке вниз</span>
+            </div>
+            <label class="switch">
+              <input id="hidePanels" type="checkbox">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <button id="resetReaderBtn" class="reset-btn" type="button">Сбросить настройки читалки</button>
+    </div>
+  </aside>
+
+  <script type="module" src="reader.js"></script>
+</body>
+</html>

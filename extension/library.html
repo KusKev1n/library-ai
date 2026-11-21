@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Мои книги — LibraryAI</title>
+  <link rel="stylesheet" href="library.css">
+</head>
+<body>
+  <header class="yb-header">
+    <div class="yb-header-inner">
+      <a href="library.html" class="yb-brand">
+        <img src="icons/icon48.png" alt="">
+        <span>LibraryAI</span>
+      </a>
+
+      <nav class="yb-nav">
+        <a href="library.html" class="active">Мои книги</a>
+        <a href="app.html">Переводчик</a>
+        <a href="reader.html">Чтение</a>
+        <a href="sync.html" class="nav-gear" title="Синхронизация с телефоном" aria-label="Синхронизация с телефоном"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></a>
+        <a href="options.html" class="nav-gear" title="Настройки" aria-label="Настройки"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.6.85 1 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></a>
+      </nav>
+
+      <div class="yb-search">
+        <input id="searchInput" type="search" placeholder="Поиск по книгам...">
+      </div>
+    </div>
+  </header>
+
+  <!-- Верхняя полка «Читаю сейчас» + кнопки действий -->
+  <section class="yb-hero">
+    <div class="yb-hero-inner">
+      <div id="heroRecentRow" class="hero-recent-row">
+        <div class="hero-empty">Загрузите EPUB/PDF или подключите локальную папку с книгами.</div>
+      </div>
+
+      <div class="hero-actions">
+        <button id="uploadBookBtn" class="pill-action primary" type="button">+ Загрузить книгу</button>
+        <button id="pickLibFolderBtn" class="pill-action" type="button">📁 Папка с книгами</button>
+        <button id="pickHistFolderBtn" class="pill-action" type="button">💾 Папка истории</button>
+        <input id="bookFileInput" type="file" accept=".epub,.pdf" multiple class="hidden">
+      </div>
+    </div>
+  </section>
+
+  <!-- Основной каталог -->
+  <div class="yb-container">
+    <aside class="yb-sidebar">
+      <button class="filter-btn active" data-filter="all" type="button">
+        <span>Все книги</span><span class="filter-count" id="cnt-all">0</span>
+      </button>
+      <button class="filter-btn" data-filter="inprogress" type="button">
+        <span>В процессе</span><span class="filter-count" id="cnt-inprogress">0</span>
+      </button>
+      <button class="filter-btn" data-filter="translated" type="button">
+        <span>Переведённые</span><span class="filter-count" id="cnt-translated">0</span>
+      </button>
+      <button class="filter-btn" data-filter="untranslated" type="button">
+        <span>Непереведённые</span><span class="filter-count" id="cnt-untranslated">0</span>
+      </button>
+      <button class="filter-btn" data-filter="local" type="button">
+        <span>Локальная папка</span><span class="filter-count" id="cnt-local">0</span>
+      </button>
+
+      <div class="sidebar-divider"></div>
+
+      <div class="folder-card">
+        <div class="folder-card-title">Локальная папка книг</div>
+        <div id="libFolderName" class="folder-card-name">Не подключена</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button id="grantLibPermBtn" class="mini-btn warn hidden" type="button">Подключить</button>
+          <button id="rescanLibBtn" class="mini-btn hidden" type="button">Обновить</button>
+          <button id="resetLibBtn" class="mini-btn hidden" type="button">Отключить</button>
+        </div>
+      </div>
+
+      <div class="folder-card" style="margin-top:10px;">
+        <div class="folder-card-title">Хранилище переводов</div>
+        <div id="histFolderName" class="folder-card-name">IndexedDB</div>
+        <div id="storageStats" style="font-size:12px;color:var(--muted);">Занято: 0 Б</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button id="grantHistPermBtn" class="mini-btn warn hidden" type="button">Подключить</button>
+          <button id="clearAllBtn" class="mini-btn danger" type="button">Очистить всё</button>
+        </div>
+      </div>
+    </aside>
+
+    <main>
+      <div class="catalog-head">
+        <h1 id="catalogTitle" class="catalog-title">Все книги</h1>
+        <div class="catalog-controls">
+          <select id="sortSelect" class="sort-select">
+            <option value="recent">Сначала недавние</option>
+            <option value="title">По названию (А–Я)</option>
+            <option value="progress">По прогрессу перевода</option>
+          </select>
+          <div class="view-switch">
+            <button id="viewCoversBtn" class="active" type="button">Обложки</button>
+            <button id="viewCardsBtn" type="button">Карточки</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="booksContainer" class="books-grid"></div>
+    </main>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script type="module" src="library.js"></script>
+</body>
+</html>
