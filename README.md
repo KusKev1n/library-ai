@@ -11,7 +11,7 @@ Live Mobile PWA: **https://kuskev1n.github.io/library-ai/**
 ## Features
 
 ### Chrome Extension (`extension/`)
-- **Yandex Books–inspired Library**: Local folder scanning for `.epub` / `.pdf` books, cover extraction (plus pastel typographic covers), Covers/Cards view switcher, search, and filters.
+- **Library**: Local folder scanning for `.epub` / `.pdf` books, cover extraction (plus pastel typographic covers), Covers/Cards view switcher, search, and filters.
 - **Full-Book AI Translator**:
   - **API Mode**: Google Gemini (2.5 / 3 / 4), DeepSeek, OpenAI / OpenRouter / Ollama with temperature slider, Thinking/Reasoning toggle, custom system prompt, and glossary.
   - **Browser Chat Tab Mode**: Automates logged-in `gemini.google.com`, `chat.deepseek.com`, and `chatgpt.com` tabs with fresh-tab-per-chunk reliability and customizable skill prefixes (`@read`, `/read`, etc.).
@@ -56,7 +56,7 @@ Live Mobile PWA: **https://kuskev1n.github.io/library-ai/**
 ## Возможности
 
 ### Расширение для ПК (`extension/`)
-- **Библиотека в стиле Яндекс Книг**: подключение локальной папки с `.epub` и `.pdf`, извлечение обложек, переключение вида «Обложки / Карточки», поиск и фильтры.
+- **Библиотека**: подключение локальной папки с `.epub` и `.pdf`, извлечение обложек, переключение вида «Обложки / Карточки», поиск и фильтры.
 - **Переводчик книг**:
   - **Через API**: Gemini, DeepSeek, OpenAI / OpenRouter / локальные модели — с настройкой температуры, режима размышления (Thinking), системного промпта и глоссария.
   - **Через вкладку чата**: работа с открытыми вкладками `gemini.google.com`, `chat.deepseek.com`, `chatgpt.com` (включая режим «новая вкладка на фрагмент» и настраиваемый префикс навыка `@read` / `/read`).
