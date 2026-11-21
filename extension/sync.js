@@ -2,6 +2,7 @@ import { initI18n } from './lib/i18n.js';
 // sync.js — Двусторонняя синхронизация библиотеки ПК ↔ Телефон (WebRTC + QR + JSON бэкап)
 
 import { generateQrSvg } from './lib/qr.js';
+import { loadSettings } from './defaults.js';
 import { generatePairingCode, startSyncHost, mergeBookRecords } from './lib/sync-rtc.js';
 import { listSavedTranslations, loadBookTranslation, saveBookTranslation, formatBytes } from './lib/storage.js';
 
@@ -118,7 +119,21 @@ async function sendSelectedBooksToPhone(framed) {
   const positions = await getReadingPositions(keysToSend);
 
   const pcLabel = `ПК (${navigator.platform || 'Chrome'})`;
-  await framed.sendJson({ type: 'SYNC_START', total: keysToSend.length, positions, pcName: pcLabel });
+  let apiConfig = null;
+  if ($('syncApiSettingsToggle')?.checked) {
+    const s = await loadSettings();
+    apiConfig = {
+      apiProvider: s.apiProvider || 'gemini',
+      apiModel: (s.apiCustomModel || '').trim() || s.apiModel || 'gemini-2.5-flash',
+      apiKey: s.apiKey || '',
+      apiBaseUrl: s.apiBaseUrl || '',
+      temperature: s.temperature ?? 0.7,
+      thinkingEnabled: Boolean(s.thinkingEnabled),
+      systemPrompt: s.systemPrompt || ''
+    };
+    log('Настройки API и ключ включены в синхронизацию.', 'ok');
+  }
+  await framed.sendJson({ type: 'SYNC_START', total: keysToSend.length, positions, pcName: pcLabel, apiConfig });
   log(`Отправка книг на телефон: ${keysToSend.length}...`);
 
   for (let i = 0; i < keysToSend.length; i++) {

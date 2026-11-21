@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "LibraryAI",
-  "version": "5.4.0",
+  "version": "5.5.0",
   "description": "Библиотека, читалка и переводчик книг PDF и EPUB через Gemini, DeepSeek, OpenAI API или вкладку чата.",
   "permissions": [
     "storage",
