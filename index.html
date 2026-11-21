@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#1b1a19">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>LibraryAI</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" href="icons/icon192.png">
+  <link rel="apple-touch-icon" href="icons/icon192.png">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <!-- ОСНОВНОЙ ЭКРАН (4 вкладки: Книги / Синхр. / Поиск / Настройки) -->
+  <div id="appShell" class="app-shell">
+    <!-- ВКЛАДКА 1: МОИ КНИГИ (в стиле мобильных Яндекс Книг) -->
+    <section id="viewLibrary" class="tab-view active">
+      <header class="mob-top">
+        <div class="mob-brand-row">
+          <h1 class="mob-title">LibraryAI</h1>
+          <button id="addEpubBtn" class="pill-btn-sm" type="button">+ EPUB</button>
+          <input id="epubFileInput" type="file" accept=".epub" multiple class="hidden">
+        </div>
+        <div id="filterPills" class="filter-pills">
+          <button class="f-pill active" data-filter="all" type="button">Все</button>
+          <button class="f-pill" data-filter="reading" type="button">Читаю</button>
+          <button class="f-pill" data-filter="translated" type="button">Переведённые</button>
+          <button class="f-pill" data-filter="new" type="button">Новые</button>
+        </div>
+      </header>
+
+      <!-- Герой-карусель обложек с мягким свечением -->
+      <div id="heroSection" class="hero-carousel-wrap">
+        <div id="heroAmbient" class="hero-ambient"></div>
+        <div id="heroCarousel" class="hero-carousel"></div>
+        <div id="heroInfo" class="hero-info">
+          <div id="heroBookTitle" class="hero-book-title">Библиотека пуста</div>
+          <div id="heroBookSub" class="hero-book-sub">Синхронизируй книги с ПК по QR или добавь .epub с телефона</div>
+          <div class="hero-cta-row">
+            <button id="heroPrimaryBtn" class="white-pill-btn" type="button">+ Синхронизировать с ПК</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Полка всех книг -->
+      <div class="shelf-section">
+        <div class="shelf-head">
+          <h2 class="shelf-title">Моя полка</h2>
+          <span id="shelfCount" class="shelf-count">0</span>
+        </div>
+        <div id="bookGrid" class="book-grid"></div>
+      </div>
+    </section>
+
+    <!-- ВКЛАДКА 2: СИНХРОНИЗАЦИЯ С ПК -->
+    <section id="viewSync" class="tab-view">
+      <header class="mob-top">
+        <h1 class="mob-title">Синхронизация</h1>
+      </header>
+
+      <div class="pane-body">
+        <div class="mob-card">
+          <div class="mob-card-title">Подключение к ПК по Wi-Fi (WebRTC)</div>
+          <p class="mob-hint">Открой в расширении на ПК иконку телефона («Синхронизация») и введи 6-значный код или отсканируй QR.</p>
+
+          <div class="pair-input-row">
+            <input id="pairCodeInput" type="text" maxlength="8" placeholder="Код (напр. K7M9P2)" autocapitalize="characters" autocomplete="off">
+            <button id="connectPairBtn" class="white-pill-btn sm" type="button">Синхр.</button>
+          </div>
+
+          <button id="scanQrBtn" class="ghost-btn full" type="button" style="margin-top:10px;">📷 Сканировать QR камерой</button>
+          <div id="qrCameraWrap" class="qr-camera-wrap hidden">
+            <video id="qrVideo" playsinline autoplay muted></video>
+            <button id="stopScanBtn" class="ghost-btn sm" type="button">Закрыть камеру</button>
+          </div>
+
+          <div class="sync-progress-track">
+            <div id="mobSyncBar" class="sync-progress-fill"></div>
+          </div>
+          <div id="mobSyncStatus" class="mob-sync-status">Готов к подключению</div>
+        </div>
+
+        <div class="mob-card">
+          <div class="mob-card-title">Ручной перенос файлом (.json)</div>
+          <p class="mob-hint">Запасной вариант без сети: экспортируй бэкап в расширении и импортируй его здесь (или обратно).</p>
+          <div class="btn-pair">
+            <button id="mobImportJsonBtn" class="ghost-btn" type="button">Импорт .json</button>
+            <button id="mobExportJsonBtn" class="ghost-btn" type="button">Экспорт .json</button>
+            <input id="mobImportJsonInput" type="file" accept=".json" class="hidden">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ВКЛАДКА 3: ПОИСК -->
+    <section id="viewSearch" class="tab-view">
+      <header class="mob-top">
+        <h1 class="mob-title">Поиск</h1>
+        <div class="mob-search-box">
+          <input id="mobSearchInput" type="search" placeholder="Название книги или автор...">
+        </div>
+      </header>
+      <div class="pane-body">
+        <div id="searchResultsGrid" class="book-grid"></div>
+      </div>
+    </section>
+
+    <!-- ВКЛАДКА 4: НАСТРОЙКИ И ПАМЯТЬ -->
+    <section id="viewSettings" class="tab-view">
+      <header class="mob-top">
+        <h1 class="mob-title">Настройки</h1>
+      </header>
+
+      <div class="pane-body">
+        <!-- Автосинхронизация при запуске -->
+        <div class="mob-card">
+          <div class="mob-card-title">Синхронизация с ПК</div>
+          <div class="mob-toggle-row">
+            <div>
+              <div style="font-size:13px;font-weight:600;">Автосинхронизация при запуске</div>
+              <div class="mob-hint" style="margin:2px 0 0;">Проверяет связь с ПК один раз при открытии или перезапуске приложения — батарею в фоне не тратит.</div>
+            </div>
+            <label class="switch">
+              <input id="mobAutoSyncToggle" type="checkbox">
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div style="border-top:1px solid var(--border);margin-top:10px;padding-top:10px;">
+            <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px;">Сохранённые связи</div>
+            <div id="mobPairedList" class="storage-books-list">
+              <div class="mob-hint" style="margin:0;">Пока нет сохранённых связей.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Память и удаление книг -->
+        <div class="mob-card">
+          <div class="mob-card-head">
+            <div class="mob-card-title">Память и книги</div>
+            <span id="storageUsageLabel" class="mob-badge">0 Б</span>
+          </div>
+          <p class="mob-hint">Книги хранятся локально на телефоне (IndexedDB) и доступны офлайн. Выбери книги для удаления или очисти всю память.</p>
+
+          <div id="storageBooksList" class="storage-books-list"></div>
+
+          <div class="btn-pair" style="margin-top:12px;">
+            <button id="deleteSelectedBooksBtn" class="danger-btn" type="button" disabled>Удалить выбранные</button>
+            <button id="clearAllStorageBtn" class="danger-btn outline" type="button">Очистить всё</button>
+          </div>
+        </div>
+
+        <!-- Настройки API для перевода глав в дороге -->
+        <div class="mob-card">
+          <div class="mob-card-title">Перевод глав в дороге (API)</div>
+          <p class="mob-hint">Позволяет нажать «Перевести главу» прямо внутри читалки без ПК. Ключ хранится только на этом телефоне.</p>
+
+          <div class="mob-field">
+            <label for="mobApiProvider">Провайдер API</label>
+            <select id="mobApiProvider">
+              <option value="gemini">Google Gemini API</option>
+              <option value="deepseek">DeepSeek API</option>
+              <option value="openai">OpenAI / OpenRouter / Custom</option>
+            </select>
+          </div>
+          <div class="mob-field">
+            <label for="mobApiModel">Модель</label>
+            <input id="mobApiModel" type="text" placeholder="gemini-2.5-flash">
+          </div>
+          <div class="mob-field">
+            <label for="mobApiKey">API-ключ</label>
+            <input id="mobApiKey" type="password" placeholder="Вставьте ключ API...">
+          </div>
+          <div class="mob-field">
+            <label for="mobApiBaseUrl">Свой Base URL (необязательно)</label>
+            <input id="mobApiBaseUrl" type="text" placeholder="По умолчанию официальный">
+          </div>
+          <div class="mob-field">
+            <label for="mobTemp">Температура: <strong id="mobTempVal">0.7</strong></label>
+            <input id="mobTemp" type="range" min="0" max="2" step="0.1" value="0.7">
+          </div>
+          <div class="mob-toggle-row">
+            <span>Размышление (Thinking)</span>
+            <label class="switch">
+              <input id="mobThinking" type="checkbox">
+              <span class="slider"></span>
+            </label>
+          </div>
+          <button id="saveMobApiBtn" class="white-pill-btn full" type="button" style="margin-top:10px;">Сохранить настройки API</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ЛИПКАЯ ПЛАШКА «ПРОДОЛЖИТЬ ЧТЕНИЕ» (как в мобильных Яндекс Книгах) -->
+    <div id="miniPlayer" class="mini-player hidden">
+      <div id="miniCover" class="mini-cover"></div>
+      <div class="mini-meta">
+        <div id="miniTitle" class="mini-title"></div>
+        <div id="miniSub" class="mini-sub"></div>
+      </div>
+      <button id="miniReadBtn" class="mini-read-btn" type="button">Читать</button>
+    </div>
+
+    <!-- НИЖНЯЯ НАВИГАЦИЯ -->
+    <nav class="bottom-nav">
+      <button class="bnav-btn active" data-tab="viewLibrary" type="button">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        <span>Книги</span>
+      </button>
+      <button class="bnav-btn" data-tab="viewSync" type="button">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+        <span>Синхр.</span>
+      </button>
+      <button class="bnav-btn" data-tab="viewSearch" type="button">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <span>Поиск</span>
+      </button>
+      <button class="bnav-btn" data-tab="viewSettings" type="button">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.6.85 1 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>Настройки</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- ПОЛНОЭКРАННАЯ МОБИЛЬНАЯ ЧИТАЛКА -->
+  <div id="readerOverlay" class="reader-overlay hidden">
+    <header id="rHeader" class="r-header">
+      <button id="rBackBtn" class="r-icon-btn" type="button" aria-label="Назад">←</button>
+      <div id="rBookTitle" class="r-book-title"></div>
+      <div class="r-head-actions">
+        <button id="rTocBtn" class="r-icon-btn" type="button" aria-label="Оглавление">☰</button>
+        <button id="rSettingsBtn" class="r-icon-btn" type="button" aria-label="Вид">Aa</button>
+      </div>
+    </header>
+
+    <div id="rScrollArea" class="r-scroll-area">
+      <div class="r-chapter-head">
+        <h2 id="rChapterTitle"></h2>
+        <div id="rChapterSub" class="r-chapter-sub"></div>
+        <div id="rChapterActions" class="r-chapter-actions hidden">
+          <button id="rTranslateBtn" class="r-subtle-btn" type="button">Перевести главу</button>
+          <button id="rStopTranslateBtn" class="r-subtle-btn danger hidden" type="button">Остановить</button>
+          <button id="rToggleOrigBtn" class="r-subtle-btn hidden" type="button">Показать оригинал</button>
+        </div>
+      </div>
+      <article id="rContent" class="r-content"></article>
+      <div class="r-bottom-nav">
+        <button id="rPrevBtn" class="r-nav-btn" type="button">← Пред. глава</button>
+        <button id="rNextBtn" class="r-nav-btn" type="button">След. глава →</button>
+      </div>
+    </div>
+
+    <!-- Шторка оглавления -->
+    <div id="rSheetBackdrop" class="r-sheet-backdrop hidden"></div>
+    <div id="rTocSheet" class="r-sheet hidden">
+      <div class="r-sheet-head">
+        <strong>Оглавление</strong>
+        <button id="rCloseTocBtn" class="r-icon-btn" type="button">×</button>
+      </div>
+      <div id="rTocList" class="r-toc-list"></div>
+    </div>
+
+    <!-- Шторка настроек вида (Цвета / Текст) -->
+    <div id="rAppearanceSheet" class="r-sheet hidden">
+      <div class="r-sheet-head">
+        <strong>Настройки чтения</strong>
+        <button id="rCloseAppearanceBtn" class="r-icon-btn" type="button">×</button>
+      </div>
+      <div class="r-sheet-body">
+        <div class="r-theme-row">
+          <button class="r-theme-chip" data-theme="paper" style="background:#f9f8f4;color:#222;" type="button">Бумага</button>
+          <button class="r-theme-chip" data-theme="sepia" style="background:#f3e8d2;color:#3d2f1e;" type="button">Сепия</button>
+          <button class="r-theme-chip" data-theme="graphite" style="background:#1b1a19;color:#e6e2dc;" type="button">Графит</button>
+          <button class="r-theme-chip" data-theme="night" style="background:#161d2b;color:#dce3f0;" type="button">Ночь</button>
+          <button class="r-theme-chip" data-theme="oled" style="background:#000000;color:#d4d4d8;" type="button">OLED</button>
+        </div>
+
+        <div class="r-ctrl-row">
+          <span>Размер шрифта</span>
+          <div class="r-stepper">
+            <button id="rFontMinus" type="button">−</button>
+            <span id="rFontSizeVal">18 px</span>
+            <button id="rFontPlus" type="button">+</button>
+          </div>
+        </div>
+        <div class="r-ctrl-row">
+          <span>Межстрочный</span>
+          <div class="r-stepper">
+            <button id="rLineMinus" type="button">−</button>
+            <span id="rLineHeightVal">1.7</span>
+            <button id="rLinePlus" type="button">+</button>
+          </div>
+        </div>
+        <div class="r-ctrl-row">
+          <span>Шрифт</span>
+          <select id="rFontFamily" style="max-width:190px;">
+            <option value='Georgia, "Times New Roman", serif'>Georgia (книжный)</option>
+            <option value='-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'>Системный</option>
+            <option value='"Palatino Linotype", Georgia, serif'>Palatino</option>
+            <option value='Verdana, sans-serif'>Verdana</option>
+          </select>
+        </div>
+        <div class="r-ctrl-row">
+          <span>Свой шрифт (.ttf / .woff2)</span>
+          <button id="rUploadFontBtn" class="ghost-btn sm" type="button">Загрузить</button>
+          <input id="rUploadFontInput" type="file" accept=".ttf,.otf,.woff,.woff2" class="hidden">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
