@@ -1,3 +1,4 @@
+import { initI18n, saveUiLang, applyI18n } from './lib/i18n.js';
 // app.js — Логика мобильного PWA LibraryAI (IndexedDB, Яндекс-карусель, Читалка с картинками и API-переводом, WebRTC QR-синхронизация)
 
 import { parseEpub } from './lib/epub.js';
@@ -849,6 +850,12 @@ function runSyncWithCode(code, { silent = false } = {}) {
 
 // --- Инициализация ---
 async function init() {
+  const uiLang = await initI18n();
+  $('mobUiLang').value = uiLang;
+  $('mobUiLang').addEventListener('change', async () => {
+    const v = await saveUiLang($('mobUiLang').value);
+    applyI18n(v);
+  });
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
   if (navigator.storage?.persist) navigator.storage.persist().catch(() => {});
 

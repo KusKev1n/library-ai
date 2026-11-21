@@ -1,5 +1,5 @@
 // sw.js — Офлайн-кэш оболочки LibraryAI PWA
-const CACHE_NAME = 'libraryai-pwa-v1.3';
+const CACHE_NAME = 'libraryai-pwa-v1.4';
 const ASSETS = [
   './',
   './index.html',
@@ -10,6 +10,7 @@ const ASSETS = [
   './lib/epub.js',
   './lib/api-client.js',
   './lib/sync-rtc.js',
+  './lib/i18n.js',
   './icons/icon192.png',
   './icons/icon512.png'
 ];
