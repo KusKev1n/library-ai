@@ -822,6 +822,17 @@ function runSyncWithCode(code, { silent = false } = {}) {
     onMessage: async (msg) => {
       if (msg.type === 'SYNC_START') {
         if (msg.pcName) savePairedPc(clean, msg.pcName);
+        if (msg.apiConfig && typeof msg.apiConfig === 'object') {
+          const mergedCfg = { ...getApiCfg(), ...msg.apiConfig };
+          saveApiCfg(mergedCfg);
+          $('mobApiProvider').value = mergedCfg.apiProvider || 'gemini';
+          $('mobApiModel').value = mergedCfg.apiModel || 'gemini-2.5-flash';
+          $('mobApiKey').value = mergedCfg.apiKey || '';
+          $('mobApiBaseUrl').value = mergedCfg.apiBaseUrl || '';
+          $('mobTemp').value = String(mergedCfg.temperature ?? 0.7);
+          $('mobTempVal').textContent = String(mergedCfg.temperature ?? 0.7);
+          $('mobThinking').checked = Boolean(mergedCfg.thinkingEnabled);
+        }
         totalExpected = msg.total || 0;
         if (msg.positions) {
           for (const [bk, ch] of Object.entries(msg.positions)) {
